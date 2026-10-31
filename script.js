@@ -1,4 +1,3 @@
-
 const API_URL =
     "https://api.github.com/repos/Gtisseran/Painty/releases";
 
@@ -38,6 +37,28 @@ themeToggle.addEventListener("click", () => {
     applyTheme(nextTheme);
     localStorage.setItem("painty-theme", nextTheme);
 });
+
+// Scroll reveal
+
+function setupReveal() {
+    const items = document.querySelectorAll(".reveal");
+
+    if (!("IntersectionObserver" in window)) {
+        items.forEach(item => item.classList.add("is-visible"));
+        return;
+    }
+
+    const observer = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+            }
+        }
+    }, { threshold: 0.15 });
+
+    items.forEach(item => observer.observe(item));
+}
 
 // Release helpers
 
@@ -121,9 +142,10 @@ function displayVersions(releases, latest) {
         return;
     }
 
-    for (const release of previousReleases) {
+    previousReleases.forEach((release, index) => {
         const card = document.createElement("article");
         card.className = "version-card";
+        card.style.transitionDelay = `${index * 0.08}s`;
 
         const information = document.createElement("div");
 
@@ -158,7 +180,29 @@ function displayVersions(releases, latest) {
 
         card.append(information, link);
         versionsList.appendChild(card);
+    });
+
+    observeVersionCards();
+}
+
+function observeVersionCards() {
+    const cards = document.querySelectorAll(".version-card");
+
+    if (!("IntersectionObserver" in window)) {
+        cards.forEach(card => card.classList.add("is-visible"));
+        return;
     }
+
+    const observer = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+            }
+        }
+    }, { threshold: 0.3 });
+
+    cards.forEach(card => observer.observe(card));
 }
 
 // Load GitHub releases
@@ -216,4 +260,5 @@ async function loadReleases() {
     }
 }
 
+setupReveal();
 loadReleases();
