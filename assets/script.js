@@ -26,6 +26,15 @@ function applyTheme(theme) {
 
     const isDark = theme === "dark";
 
+    document.querySelectorAll("[data-theme-icon]").forEach(icon => {
+        const isPaperIcon = icon.dataset.themeIcon === "paper";
+        const iconFile = isPaperIcon
+            ? (isDark ? "down_l.svg" : "down_d.svg")
+            : (isDark ? "down_d.svg" : "down_l.svg");
+
+        icon.src = `assets/${iconFile}`;
+    });
+
     themeToggle.setAttribute(
         "aria-label",
         isDark ? "Switch to light mode" : "Switch to dark mode"
@@ -123,6 +132,18 @@ function formatDate(value) {
         month: "short",
         year: "numeric"
     }).format(date);
+}
+
+function createExternalLinkIcon() {
+    const icon = document.createElement("img");
+    icon.className = "theme-icon";
+    icon.dataset.themeIcon = "paper";
+    const isDark = document.documentElement.dataset.theme === "dark";
+    icon.src = isDark ? "assets/down_l.svg" : "assets/down_d.svg";
+    icon.alt = "";
+    icon.setAttribute("aria-hidden", "true");
+
+    return icon;
 }
 
 function createElement(tag, className, content) {
@@ -232,9 +253,10 @@ function displayVersions(releases, latest) {
         link.target = "_blank";
         link.rel = "noopener noreferrer";
 
-        link.textContent = installer
-            ? "Download ↗"
-            : "View release ↗";
+        link.append(
+            installer ? "Download " : "View release ",
+            createExternalLinkIcon()
+        );
 
         card.append(information, link);
         versionsList.appendChild(card);

@@ -163,8 +163,8 @@ button { font: inherit; }
     box-shadow: 7px 7px 0 var(--paper);
 }
 
-.download-button svg { width: 17px; height: 17px; }
-.download-arrow { margin-left: 4px; opacity: .8; }
+.download-button > svg { width: 17px; height: 17px; }
+.download-arrow { width: 14px; height: 14px; margin-left: 4px; opacity: .8; }
 
 .download-info {
     margin-top: 16px;
@@ -181,6 +181,12 @@ button { font: inherit; }
 }
 
 .download-error a { text-decoration: underline; }
+.download-error a img,
+.version-download img {
+    width: 12px;
+    height: 12px;
+    vertical-align: -2px;
+}
 
 /* Versions */
 
@@ -250,6 +256,9 @@ button { font: inherit; }
 }
 
 .version-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
     flex-shrink: 0;
     font-size: 12px;
     font-weight: 600;
