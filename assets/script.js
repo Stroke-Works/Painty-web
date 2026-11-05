@@ -1,8 +1,14 @@
-const API_URL =
-    "https://api.github.com/repos/Stroke-Works/Painty/releases";
+const API_BASE =
+    "https://api.github.com/repos/Stroke-Works/Painty";
+
+const LATEST_RELEASE_URL =
+    `${API_BASE}/releases/latest`;
 
 const RELEASES_URL =
     "https://github.com/Stroke-Works/Painty/releases";
+
+const CACHE_KEY = "painty-releases-cache";
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 const downloadButton = document.getElementById("download-button");
 const downloadInfo = document.getElementById("download-info");
@@ -10,7 +16,10 @@ const downloadError = document.getElementById("download-error");
 const versionsList = document.getElementById("versions-list");
 const themeToggle = document.getElementById("theme-toggle");
 
+
+// --------------------------------------------------
 // Theme
+// --------------------------------------------------
 
 function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
@@ -24,7 +33,7 @@ function applyTheme(theme) {
 
     themeToggle.title = isDark
         ? "Switch to light mode"
-        : "Switch to dark mode";
+        : "Switch theme";
 }
 
 const savedTheme = localStorage.getItem("painty-theme");
@@ -38,7 +47,10 @@ themeToggle.addEventListener("click", () => {
     localStorage.setItem("painty-theme", nextTheme);
 });
 
+
+// --------------------------------------------------
 // Scroll reveal
+// --------------------------------------------------
 
 function setupReveal() {
     const items = document.querySelectorAll(".reveal");
@@ -60,48 +72,80 @@ function setupReveal() {
     items.forEach(item => observer.observe(item));
 }
 
+
+// --------------------------------------------------
 // Release helpers
+// --------------------------------------------------
 
 function getInstaller(release) {
-    const assets = release.assets || [];
+    const assets = Array.isArray(release.assets)
+        ? release.assets
+        : [];
 
-    const executables = assets.filter(asset => {
+    // 1. Prefer a clearly named installer / setup (e.g. PaintySetup-0.3.0.exe)
+    const installer = assets.find(asset => {
         const name = asset.name.toLowerCase();
-
-        return name.endsWith(".exe") &&
-            !/debug|symbols|portable/i.test(name);
+        return (
+            name.endsWith(".exe") &&
+            !/debug|symbols|portable|sha256|checksum/i.test(name) &&
+            /setup|installer|install/i.test(name)
+        );
     });
 
-    return executables.find(asset =>
-        /setup|installer|install|windows/i.test(asset.name)
-    ) || executables[0] || null;
+    if (installer) {
+        return installer;
+    }
+
+    // 2. Fallback: any .exe that is not a debug/symbols/checksum file
+    //    (covers the portable "painty.exe")
+    return assets.find(asset => {
+        const name = asset.name.toLowerCase();
+        return (
+            name.endsWith(".exe") &&
+            !/debug|symbols|sha256|checksum/i.test(name)
+        );
+    }) || null;
 }
 
 function formatDate(value) {
-    if (!value) return "Unknown date";
+    if (!value) {
+        return "Unknown date";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return "Unknown date";
+    }
 
     return new Intl.DateTimeFormat("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric"
-    }).format(new Date(value));
+    }).format(date);
 }
 
 function createElement(tag, className, content) {
     const element = document.createElement(tag);
+
     element.className = className;
     element.textContent = content;
 
     return element;
 }
 
+
+// --------------------------------------------------
 // Download button
+// --------------------------------------------------
 
 function setDownloadLink(release) {
     const installer = getInstaller(release);
 
     if (!installer) {
-        downloadButton.href = release.html_url || RELEASES_URL;
+        downloadButton.href =
+            release.html_url || RELEASES_URL;
+
         downloadButton.target = "_blank";
         downloadButton.rel = "noopener noreferrer";
 
@@ -109,10 +153,13 @@ function setDownloadLink(release) {
             `Installer unavailable · ${release.tag_name}`;
 
         downloadError.hidden = false;
+
         return;
     }
 
-    downloadButton.href = installer.browser_download_url;
+    downloadButton.href =
+        installer.browser_download_url;
+
     downloadButton.removeAttribute("target");
     downloadButton.removeAttribute("rel");
 
@@ -122,13 +169,16 @@ function setDownloadLink(release) {
     downloadError.hidden = true;
 }
 
+
+// --------------------------------------------------
 // Previous versions
+// --------------------------------------------------
 
 function displayVersions(releases, latest) {
     versionsList.replaceChildren();
 
-    const previousReleases = releases.filter(release =>
-        release.id !== latest.id
+    const previousReleases = releases.filter(
+        release => release.id !== latest.id
     );
 
     if (previousReleases.length === 0) {
@@ -139,20 +189,26 @@ function displayVersions(releases, latest) {
                 "No previous versions available yet."
             )
         );
+
         return;
     }
 
     previousReleases.forEach((release, index) => {
         const card = document.createElement("article");
-        card.className = "version-card";
-        card.style.transitionDelay = `${index * 0.08}s`;
 
-        const information = document.createElement("div");
+        card.className = "version-card";
+        card.style.transitionDelay =
+            `${index * 0.08}s`;
+
+        const information =
+            document.createElement("div");
 
         const name = createElement(
             "h3",
             "version-name",
-            release.name || release.tag_name || "Untitled release"
+            release.name ||
+            release.tag_name ||
+            "Untitled release"
         );
 
         const date = createElement(
@@ -164,9 +220,11 @@ function displayVersions(releases, latest) {
         information.append(name, date);
 
         const installer = getInstaller(release);
+
         const link = document.createElement("a");
 
         link.className = "version-download";
+
         link.href = installer
             ? installer.browser_download_url
             : (release.html_url || RELEASES_URL);
@@ -186,10 +244,14 @@ function displayVersions(releases, latest) {
 }
 
 function observeVersionCards() {
-    const cards = document.querySelectorAll(".version-card");
+    const cards =
+        document.querySelectorAll(".version-card");
 
     if (!("IntersectionObserver" in window)) {
-        cards.forEach(card => card.classList.add("is-visible"));
+        cards.forEach(card =>
+            card.classList.add("is-visible")
+        );
+
         return;
     }
 
@@ -205,47 +267,125 @@ function observeVersionCards() {
     cards.forEach(card => observer.observe(card));
 }
 
+
+// --------------------------------------------------
+// GitHub API + cache
+// --------------------------------------------------
+
+async function fetchGitHub(url) {
+    const response = await fetch(url, {
+        headers: {
+            Accept: "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28"
+        }
+    });
+
+    if (!response.ok) {
+        const error = new Error(
+            `GitHub API error: ${response.status}`
+        );
+        error.status = response.status;
+        throw error;
+    }
+
+    return response.json();
+}
+
+function readCache() {
+    try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+
+        const { timestamp, data } = JSON.parse(raw);
+
+        if (Date.now() - timestamp > CACHE_TTL_MS) {
+            localStorage.removeItem(CACHE_KEY);
+            return null;
+        }
+
+        return data;
+    } catch {
+        return null;
+    }
+}
+
+function writeCache(data) {
+    try {
+        localStorage.setItem(
+            CACHE_KEY,
+            JSON.stringify({
+                timestamp: Date.now(),
+                data
+            })
+        );
+    } catch {
+        // Quota exceeded or private mode – ignore
+    }
+}
+
+
+// --------------------------------------------------
 // Load GitHub releases
+// --------------------------------------------------
 
 async function loadReleases() {
     try {
-        const response = await fetch(API_URL, {
-            headers: {
-                Accept: "application/vnd.github+json"
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`GitHub API error: ${response.status}`);
+        // Try cache first (avoids rate-limit & speeds up reloads)
+        const cached = readCache();
+        if (cached && cached.latest && cached.stableReleases) {
+            setDownloadLink(cached.latest);
+            displayVersions(cached.stableReleases, cached.latest);
+            return;
         }
 
-        const releases = await response.json();
+        // Parallel fetch for speed
+        const [latest, releases] = await Promise.all([
+            fetchGitHub(LATEST_RELEASE_URL),
+            fetchGitHub(`${API_BASE}/releases?per_page=100`)
+        ]);
 
         const stableReleases = releases
             .filter(release =>
-                !release.draft && !release.prerelease
+                !release.draft &&
+                !release.prerelease
             )
             .sort((a, b) =>
-                new Date(b.published_at) - new Date(a.published_at)
+                new Date(b.published_at) -
+                new Date(a.published_at)
             );
 
-        if (stableReleases.length === 0) {
-            throw new Error("No stable releases found.");
+        // Make sure the "latest" release is present
+        if (!stableReleases.some(
+            release => release.id === latest.id
+        )) {
+            stableReleases.unshift(latest);
         }
 
-        const latest = stableReleases[0];
+        // Persist for next visits
+        writeCache({ latest, stableReleases });
 
         setDownloadLink(latest);
         displayVersions(stableReleases, latest);
 
     } catch (error) {
-        console.error("Failed to load Painty releases:", error);
+        console.error(
+            "Failed to load Painty releases:",
+            error
+        );
 
+        // Fallback UI
         downloadButton.href = RELEASES_URL;
         downloadButton.target = "_blank";
         downloadButton.rel = "noopener noreferrer";
 
-        downloadInfo.textContent = "Browse releases on GitHub";
+        if (error.status === 403) {
+            downloadInfo.textContent =
+                "Rate limited · Browse on GitHub";
+        } else {
+            downloadInfo.textContent =
+                "Browse releases on GitHub";
+        }
+
         downloadError.hidden = false;
 
         versionsList.replaceChildren();
@@ -254,11 +394,18 @@ async function loadReleases() {
             createElement(
                 "div",
                 "empty-state",
-                "Unable to load releases. Please try again later."
+                error.status === 403
+                    ? "GitHub rate limit reached. Please try again in a few minutes or browse the releases page."
+                    : "Unable to load releases. Please try again later."
             )
         );
     }
 }
+
+
+// --------------------------------------------------
+// Init
+// --------------------------------------------------
 
 setupReveal();
 loadReleases();
