@@ -1,8 +1,8 @@
 const API_URL =
-    "https://api.github.com/repos/Gtisseran/Painty/releases";
+    "https://api.github.com/repos/Stroke-Works/Painty/releases";
 
 const RELEASES_URL =
-    "https://github.com/Gtisseran/Painty/releases";
+    "https://github.com/Stroke-Works/Painty/releases";
 
 const downloadButton = document.getElementById("download-button");
 const downloadInfo = document.getElementById("download-info");
