@@ -40,7 +40,7 @@ button { font: inherit; }
 
 /* Scroll reveal */
 
-.reveal {
+.js .reveal {
     opacity: 0;
     transform: translateY(28px);
     transition:
@@ -61,17 +61,8 @@ button { font: inherit; }
     margin: auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
 }
-
-.header-brand {
-    font-family: "IM Fell English", serif;
-    font-size: 28px;
-    font-style: italic;
-    transition: transform .4s var(--ease);
-}
-
-.header-brand:hover { transform: rotate(-6deg) scale(1.08); }
 
 .theme-toggle {
     width: 40px;
@@ -83,12 +74,23 @@ button { font: inherit; }
     border: 1.5px solid var(--ink);
     border-radius: 50%;
     cursor: pointer;
-    transition: transform .3s var(--ease), color .2s ease;
+    transition: transform .35s var(--ease), color .2s ease, box-shadow .3s ease;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
 }
 
-.theme-toggle:hover { transform: rotate(12deg); color: var(--accent); }
-.theme-toggle svg { width: 17px; height: 17px; }
-.moon-icon { display: none; }
+.theme-toggle:hover {
+    transform: rotate(12deg) scale(1.04);
+    color: var(--accent);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+.theme-toggle svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    transition: opacity .25s ease, transform .25s ease;
+}
+.theme-toggle:hover svg { transform: scale(1.06); }
+.theme-toggle .moon-icon { display: none; }
 [data-theme="dark"] .sun-icon { display: none; }
 [data-theme="dark"] .moon-icon { display: block; }
 
@@ -228,7 +230,7 @@ button { font: inherit; }
 
 .versions-list { display: grid; }
 
-.version-card {
+.js .version-card {
     min-height: 62px;
     display: flex;
     justify-content: space-between;
@@ -237,7 +239,13 @@ button { font: inherit; }
     border-bottom: 1px dashed var(--line);
     opacity: 0;
     transform: translateX(-14px);
-    transition: opacity .5s var(--ease), transform .5s var(--ease), padding .2s ease;
+    transition:
+        opacity .42s var(--ease),
+        transform .42s var(--ease),
+        padding-left .28s var(--ease),
+        background-color .25s ease,
+        filter .25s ease;
+    will-change: transform, opacity;
 }
 
 .version-card.is-visible {
@@ -245,7 +253,11 @@ button { font: inherit; }
     transform: translateX(0);
 }
 
-.version-card.is-visible:hover { padding-left: 6px; }
+.version-card.is-visible:hover {
+    padding-left: 6px;
+    background: rgba(107, 79, 196, 0.04);
+    filter: saturate(1.08);
+}
 
 .version-name { font-size: 14px; font-weight: 600; }
 

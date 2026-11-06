@@ -7,6 +7,7 @@
     <meta name="description" content="Painty — A little space for creativity.">
     <title>Painty</title>
 
+    <script>document.documentElement.classList.add("js");</script>
     <link rel="icon" href="assets/icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,17 +19,10 @@
 
 <body>
     <header class="header">
-        <a class="header-brand" href="#" aria-label="Painty home">P.</a>
-
         <button class="theme-toggle" id="theme-toggle" type="button"
             aria-label="Switch to dark mode" title="Switch theme">
-            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/>
-                <path d="M12 2V4M12 20V22M4.93 4.93L6.34 6.34M17.66 17.66L19.07 19.07M2 12H4M20 12H22M4.93 19.07L6.34 17.66M17.66 6.34L19.07 4.93" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-            </svg>
-            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5V5M12 19V21.5M4.93 4.93L6.56 6.56M17.44 17.44L19.07 19.07M2.5 12H5M19 12H21.5M4.93 19.07L6.56 17.44M17.44 6.56L19.07 4.93" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19.2 14.8A7.7 7.7 0 0 1 9.2 4.8a7.7 7.7 0 1 0 10 10Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
     </header>
 
@@ -45,7 +39,7 @@
                     <path d="M12 3V15M7 10L12 15L17 10M5 19H19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <span>Download</span>
-                <img class="download-arrow theme-icon" src="assets/down_l.svg" data-theme-icon alt="" aria-hidden="true">
+                <img class="download-arrow theme-icon" src="assets/down_l.svg" data-theme-icon="ink" alt="" aria-hidden="true">
             </a>
 
             <p class="download-info reveal" style="--delay: .4s" id="download-info">Windows · Free</p>
@@ -54,7 +48,7 @@
                 Could not find the installer.
                 <a href="https://github.com/Stroke-Works/Painty/releases/latest">
                     Browse releases
-                    <img class="theme-icon" src="assets/down_l.svg" data-theme-icon alt="" aria-hidden="true">
+                    <img class="theme-icon" src="assets/down_l.svg" data-theme-icon="bg" alt="" aria-hidden="true">
                 </a>
             </p>
         </section>
